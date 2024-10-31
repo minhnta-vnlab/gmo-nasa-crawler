@@ -1,0 +1,33 @@
+{
+  "dependencies": {
+    "@slack/web-api": "^7.7.0",
+    "axios": "^1.7.7",
+    "dotenv": "^16.4.5",
+    "fastify": "^5.0.0",
+    "node-cron": "^3.0.3",
+    "ts-node": "^10.9.2",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.8.4",
+    "@types/node-cron": "^3.0.11",
+    "@types/xml2js": "^0.4.14",
+    "concurrently": "^9.0.1",
+    "nodemon": "^3.1.7",
+    "typescript": "^5.6.3"
+  },
+  "name": "gmo-nasa-crawler",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc -p tsconfig.json",
+    "start": "node build/index.js",
+    "cron": "node build/cron.js",
+    "dev": "concurrently \"nodemon --watch src --exec ts-node src/index.ts\" \"nodemon --watch src --exec ts-node src/cron.ts\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
