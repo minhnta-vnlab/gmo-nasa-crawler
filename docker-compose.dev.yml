@@ -4,8 +4,8 @@ services:
     container_name: crawlserver
     ports:
       - ${CRAWL_SERVER_PORT}:${CRAWL_SERVER_PORT}
-    volumes:
-      - ./:/app
+    # volumes:
+    #   - ./:/app
     env_file:
       - .env.docker
     command: ["npm", "run", "start"]
@@ -13,8 +13,8 @@ services:
   cron:
     build: .
     container_name: cron
-    volumes:
-      - ./:/app
+    # volumes:
+    #   - ./:/app
     env_file:
       - .env.docker
     command: ["npm", "run", "cron"]
