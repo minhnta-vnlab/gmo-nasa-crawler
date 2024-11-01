@@ -23,6 +23,13 @@ export class SlackService {
             text: message,
         })
     }
+
+    async publicMessageBlock(channelId: string, blocks: any) {
+        return this.client.chat.postMessage({
+            channel: channelId,
+            blocks: blocks
+        })
+    }
 }
 
 const slackService = new SlackService(slackClient)

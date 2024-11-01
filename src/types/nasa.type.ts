@@ -6,4 +6,6 @@ export type NasaNewFetch = {
     pubDate: string; // e.g., "Thu, 31 Oct 2024 10:30:00 +0900"
 }
 
-export type NasaNew = Pick<NasaNewFetch, "title" | "pubDate" | "link">
+export type NasaNew = Pick<NasaNewFetch, "title" | "pubDate" | "link"> & {
+    summary?: string | null
+}

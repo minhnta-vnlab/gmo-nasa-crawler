@@ -2,7 +2,8 @@ import nodeCron from 'node-cron'
 import env from './env';
 import slackService from './libs/services/slack.service';
 import { NasaNew } from './types/nasa.type';
-
+import chatService from './libs/services/chatgpt.service';
+import crawlController from './controllers/nasa.crawl.controller';
 // Simple cron job
 // TODO: make it better later
 export const cron = {
@@ -28,12 +29,44 @@ export const cron = {
                 console.info(`[INFO] - NASA NEWS CRAWL: Got ${res.length} news`)
                 const news = res.news as NasaNew[]
 
-                news.forEach(n => {
-                    const message = `Hey! Got some news: \n${n.title}\nDetail: ${n.link}`;
-                    env.SLACK_CHANNEL_LIST.forEach(c => {
-                        console.info(`[INFO] - NASA NEWS CRAWL: Sending ${n.link} to ${c.team}/${c.channel}`)
-                        slackService.publishMessage(c.channel, message)
-                    })
+                const detailedNews = await crawlController.fetchNewsDetails(news);
+                
+                const summarizedNews = await Promise.all(detailedNews.map(async (n) => {
+                    if (typeof n.summary === 'string') {
+                        n.summary = await chatService.summarizeContentToVietnamese(n.summary);
+                    }
+                    return n;
+                }));
+
+                const headerBlock = {
+                    "type": "header",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Thông báo mới từ GMO Nasa",
+                        "emoji": true
+                    }
+                }
+                
+                env.SLACK_CHANNEL_LIST.forEach(c => {
+                    const newsBlocks = summarizedNews.map(item => ({
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": `*${item.title}*\n${item.summary}`
+                        },
+                        "accessory": {
+                            "type": "button",
+                            "text": {
+                                "type": "plain_text",
+                                "text": "Xem chi tiết",
+                                "emoji": true
+                            },
+                            "url": item.link
+                        }
+                    }));
+                    const blocks = [headerBlock, ...newsBlocks]
+
+                    slackService.publicMessageBlock(c.channel, blocks)
                 })
             } else {
                 console.info("[INFO] - NASA NEWS CRAWL: Got nothing news")
