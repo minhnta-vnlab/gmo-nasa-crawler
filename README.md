@@ -5,7 +5,7 @@ Crawl from https://nasa.gmo.jp and automatically send news to Slack
 Create `.env` and `.env.docker` by the following example:
 ```env
 # change to 'crawlserver' for Docker
-CRAWL_SERVER_HOST=localhost
+CRAWL_SERVER_HOST=127.0.0.1
 CRAWL_SERVER_PORT=8080
 
 SLACK_OATH_TOKEN=oauth-token
