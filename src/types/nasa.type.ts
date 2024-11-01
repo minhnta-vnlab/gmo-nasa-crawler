@@ -7,5 +7,5 @@ export type NasaNewFetch = {
 }
 
 export type NasaNew = Pick<NasaNewFetch, "title" | "pubDate" | "link"> & {
-    summary?: string
+    summary?: string | null
 }

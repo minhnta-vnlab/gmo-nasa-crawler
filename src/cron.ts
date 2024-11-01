@@ -2,7 +2,8 @@ import nodeCron from 'node-cron'
 import env from './env';
 import slackService from './libs/services/slack.service';
 import { NasaNew } from './types/nasa.type';
-
+import chatService from './libs/services/chatgpt.service';
+import crawlController from './controllers/nasa.crawl.controller';
 // Simple cron job
 // TODO: make it better later
 export const cron = {
@@ -28,7 +29,15 @@ export const cron = {
                 console.info(`[INFO] - NASA NEWS CRAWL: Got ${res.length} news`)
                 const news = res.news as NasaNew[]
 
+                const detailedNews = await crawlController.fetchNewsDetails(news);
                 
+                const summarizedNews = await Promise.all(detailedNews.map(async (n) => {
+                    if (typeof n.summary === 'string') {
+                        n.summary = await chatService.summarizeContentToVietnamese(n.summary);
+                    }
+                    return n;
+                }));
+
                 const headerBlock = {
                     "type": "header",
                     "text": {
@@ -37,14 +46,9 @@ export const cron = {
                         "emoji": true
                     }
                 }
-
-                // Map each new, add summary
-                news.map(n => {
-                    n.summary = "<summary here>"
-                });
                 
                 env.SLACK_CHANNEL_LIST.forEach(c => {
-                    const newsBlocks = news.map(item => ({
+                    const newsBlocks = summarizedNews.map(item => ({
                         "type": "section",
                         "text": {
                             "type": "mrkdwn",
