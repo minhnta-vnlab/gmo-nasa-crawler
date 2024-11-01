@@ -28,12 +28,41 @@ export const cron = {
                 console.info(`[INFO] - NASA NEWS CRAWL: Got ${res.length} news`)
                 const news = res.news as NasaNew[]
 
-                news.forEach(n => {
-                    const message = `Hey! Got some news: \n${n.title}\nDetail: ${n.link}`;
-                    env.SLACK_CHANNEL_LIST.forEach(c => {
-                        console.info(`[INFO] - NASA NEWS CRAWL: Sending ${n.link} to ${c.team}/${c.channel}`)
-                        slackService.publishMessage(c.channel, message)
-                    })
+                
+                const headerBlock = {
+                    "type": "header",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Thông báo mới từ GMO Nasa",
+                        "emoji": true
+                    }
+                }
+
+                // Map each new, add summary
+                news.map(n => {
+                    n.summary = "<summary here>"
+                });
+                
+                env.SLACK_CHANNEL_LIST.forEach(c => {
+                    const newsBlocks = news.map(item => ({
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": `*${item.title}*\n${item.summary}`
+                        },
+                        "accessory": {
+                            "type": "button",
+                            "text": {
+                                "type": "plain_text",
+                                "text": "Xem chi tiết",
+                                "emoji": true
+                            },
+                            "url": item.link
+                        }
+                    }));
+                    const blocks = [headerBlock, ...newsBlocks]
+
+                    slackService.publicMessageBlock(c.channel, blocks)
                 })
             } else {
                 console.info("[INFO] - NASA NEWS CRAWL: Got nothing news")
